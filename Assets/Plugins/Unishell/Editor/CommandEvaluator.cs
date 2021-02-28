@@ -57,16 +57,8 @@ public class CommandEvaluator {
 	}
 
 	public bool UpHistory() {
-		if (previousCommands.Count > 0) {
-			if (commandScrollIdx == -1) {
-				commandScrollIdx = previousCommands.Count - 1;
-				return true;
-			} else {
-				commandScrollIdx--;
-				if (commandScrollIdx < 0) {
-					commandScrollIdx = 0;
-				}
-			}
+		if (previousCommands.Count > 0 && commandScrollIdx > 0) {
+			commandScrollIdx--;
 			commandText = previousCommands[commandScrollIdx];
 			return true;
 		}
@@ -74,16 +66,14 @@ public class CommandEvaluator {
 	}
 
 	public bool DownHistory() {
-		if (commandScrollIdx != -1) {
+		if (previousCommands.Count > 0 && commandScrollIdx < previousCommands.Count) {
 			commandScrollIdx++;
-			if (commandScrollIdx < previousCommands.Count) {
-				commandText = previousCommands[commandScrollIdx];
-				return true;
-			} else {
+			if (commandScrollIdx >= previousCommands.Count) {
 				commandText = "";
-				commandScrollIdx = -1;
-				return true;
+			} else {
+				commandText = previousCommands[commandScrollIdx];
 			}
+			return true;
 		}
 		return false;
 	}
@@ -91,7 +81,7 @@ public class CommandEvaluator {
 	public void Eval() {
 		RunCommand(commandText);
 		commandText = "";
-		commandScrollIdx = -1;
+		commandScrollIdx = previousCommands.Count;
 	}
 
 	string TryTabComplete(string cmdText) {
@@ -141,7 +131,7 @@ public class CommandEvaluator {
 
 	void AddCommandToBuffer(string toAdd) {
 		previousCommands.Add(toAdd);
-		if (previousCommands.Count > MAX_CMD_BUFFER) {
+		while (previousCommands.Count > MAX_CMD_BUFFER) {
 			previousCommands.RemoveAt(0);
 		}
 	}
